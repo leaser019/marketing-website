@@ -13,7 +13,7 @@ export default function FilmLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="p-10">
+      <body className="p-10 mx-15">
           {children}
       </body>
     </html>

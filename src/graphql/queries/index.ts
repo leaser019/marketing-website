@@ -42,12 +42,19 @@ export const GET_FILM_BY_ID = (slug: string) =>
   ` : gql`query GetFilmById {}`);
   
 export const GET_ALL_CHARACTERS = gql`
- query GetAllCharacters {
-   allPeople {
-    people {
-      id
-      name
+query GetAllCharacters($first: Int, $after: String) {
+    allPeople(first: $first, after: $after) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          name
+        }
+      }
     }
   }
-}
 `;

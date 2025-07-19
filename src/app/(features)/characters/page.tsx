@@ -12,51 +12,63 @@ import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 
 export default function Characters() {
-  const { data, loading, error } = useQuery(GET_ALL_CHARACTERS);
   const [searchTerm, setSearchTerm] = useState("");
-  const [displayedCharacters, setDisplayedCharacters] = useState([]);
-  const [page, setPage] = useState(1);
-  const charactersPerPage = 12;
+  const [displayedCharacters, setDisplayedCharacters] = useState<Character[]>([]);
   const { ref, inView } = useInView();
   
+  const { data, loading, error, fetchMore } = useQuery(GET_ALL_CHARACTERS, {
+    variables: { first: 12, after: null }
+  });
+
   useEffect(() => {
-    if (!data?.allPeople?.people) return;
-    
-    const filtered = data.allPeople.people.filter(char => 
-      char.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    if (searchTerm) {
-      setDisplayedCharacters(filtered.slice(0, charactersPerPage));
-      setPage(1);
-    } else {
-      setDisplayedCharacters(filtered.slice(0, page * charactersPerPage));
+    if (data?.allPeople?.edges) {
+      const characters = data.allPeople.edges.map((edge: {
+        node: {
+          id: string,
+          name: string
+      }}) => ({
+        id: edge.node.id,
+        name: edge.node.name,
+        __typename: 'Person'
+      }));
+      
+      setDisplayedCharacters(characters.filter((char : { id: string, name: string }) => 
+        char.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ));
     }
-  }, [data, searchTerm, page]);
+  }, [data, searchTerm]);
   
   useEffect(() => {
-    if (inView && !loading && !searchTerm) {
+    if (inView && !loading && data?.allPeople?.pageInfo?.hasNextPage) {
       loadMore();
     }
   }, [inView, loading]);
   
   const loadMore = useCallback(() => {
-    if (!data?.allPeople?.people) return;
+    if (!data?.allPeople?.pageInfo?.hasNextPage) return;
     
-    const filtered = data.allPeople.people.filter(char => 
-      char.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    const nextPage = page + 1;
-    const hasMore = nextPage * charactersPerPage < filtered.length;
-    
-    if (hasMore) {
-      setDisplayedCharacters(filtered.slice(0, nextPage * charactersPerPage));
-      setPage(nextPage);
-    }
-  }, [data, page, searchTerm]);
+    fetchMore({
+      variables: {
+        first: 12,
+        after: data.allPeople.pageInfo.endCursor
+      },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!fetchMoreResult) return prev;
+        return {
+          allPeople: {
+            __typename: prev.allPeople.__typename,
+            pageInfo: fetchMoreResult.allPeople.pageInfo,
+            edges: [
+              ...prev.allPeople.edges,
+              ...fetchMoreResult.allPeople.edges
+            ]
+          }
+        };
+      }
+    });
+  }, [data, fetchMore]);
   
-  if (loading) return <CharactersGridSkeleton />;
+  if (loading && !displayedCharacters.length) return <CharactersGridSkeleton />;
   if (error) return (
       <div className="m-10 p-15"><Error message={error.message} /></div>
   );
@@ -82,7 +94,7 @@ export default function Characters() {
         <div className="text-center py-20">
           <h3 className="text-xl font-medium mb-2">Can not find any character</h3>
           <p className="text-muted-foreground mb-6">Try to find another one</p>
-          <Button variant="outline" onClick={() => setSearchTerm("")}>Watch all character</Button>
+          <Button variant="outline" onClick={() => setSearchTerm("")}>View all characters</Button>
         </div>
       ) : (
         <>
@@ -101,11 +113,16 @@ export default function Characters() {
             ))}
           </div>
           
-          {!searchTerm && displayedCharacters.length < (data?.allPeople?.people?.length || 0) && (
-            <div className="py-8 flex justify-center" ref={ref}>
-              <Button variant="outline" onClick={loadMore} disabled={loading}>
-                {loading ? "Loading..." : "More"}
-              </Button>
+          {!searchTerm && data?.allPeople?.pageInfo?.hasNextPage && (
+            <div ref={ref}>
+                {loading ? (
+                    <>
+                       <span className="flex justify-center py-8 mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
+                    Loading...
+                  </>
+                ) : (
+                  <CharactersGridSkeleton />
+                )}
             </div>
           )}
         </>

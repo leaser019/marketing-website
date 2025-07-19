@@ -4,6 +4,7 @@ import { Error } from "@/components/common/Error";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFilmStore } from "@/store/store";
+import { FilmDetailProps } from "@/types/films";
 import { ArrowLeft, Calendar, Heart, User } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -13,18 +14,15 @@ export default function FilmDetail() {
   const { slug } = useParams();
   const [isFavorite, setIsFavorite] = useState(false);
   const listFilm = useFilmStore(state => state.listFilm)
-  const [film, setFilm] = useState(null);
+  const [film, setFilm] = useState<FilmDetailProps | null >(null);
   const router = useRouter() 
 
   useEffect(() => {
-    console.log(typeof slug);
     if (slug && listFilm?.length) {
       const foundFilm = listFilm.find(film => {
         return film.id.slice(0,10) === slug.slice(0,10)
       });
-      console.log(foundFilm);
       setFilm(foundFilm || null);
-      console.log("done");
     }
   }, [slug, listFilm]);
 
@@ -39,7 +37,7 @@ export default function FilmDetail() {
     const favorites = JSON.parse(localStorage.getItem("favoriteFilms") || "[]");
     
     if (isFavorite) {
-      const newFavorites = favorites.filter(id => id !== slug);
+      const newFavorites  = favorites.filter((id : string) => id !== slug);
       localStorage.setItem("favoriteFilms", JSON.stringify(newFavorites));
     } else {
       favorites.push(slug);
@@ -65,7 +63,7 @@ export default function FilmDetail() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">{film.title}</h1>
+          <h1 className="text-center text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-black">{film.title}</h1>
           <Button 
             variant="outline" 
             size="icon" 
@@ -114,30 +112,11 @@ export default function FilmDetail() {
           </div>
 
           <div>
-            <Card className="sticky top-6 shadow-md border-muted/60 overflow-hidden border-t-4 border-t-blue-500">
-              <CardHeader className="bg-muted/30">
-                <CardTitle>More Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6 pt-6">
+            <Card className="sticky top-6 shadow-md border-muted/60 overflow-hidden border-t-4 border-t-black">
+              <CardContent className="space-y-6">
                 <div>
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <span className="inline-block w-1 h-4 bg-blue-500 rounded-full"></span>
-                    Timeline
-                  </h3>
-                  <div className="bg-muted/50 h-3 rounded-full overflow-hidden mb-3">
-                    <div className="bg-gradient-to-r from-blue-500 to-primary h-full rounded-full" style={{ width: "60%" }}></div>
-                  </div>
-                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary rounded-full font-medium">
-                      {parseInt(film.id.split(':')[1]) || "?"}
-                    </span>
-                    <span>in film series</span>
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <span className="inline-block w-1 h-4 bg-blue-500 rounded-full"></span>
+                    <span className="inline-block w-1 h-4 bg-black rounded-full"></span>
                     Related
                   </h3>
                   <div className="space-y-2">
@@ -150,7 +129,7 @@ export default function FilmDetail() {
                     <Button variant="outline" asChild className="w-full justify-start hover:bg-muted/30 hover:text-primary transition-colors">
                       <Link href="/films-list">
                         <Calendar className="h-4 w-4 mr-2" />
-                        Other films
+                        All Films
                       </Link>
                     </Button>
                   </div>
