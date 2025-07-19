@@ -3,6 +3,7 @@
 import { Error } from "@/components/common/Error";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { generateFilmSchema } from "@/lib/schemas";
 import { useFilmStore } from "@/store/store";
 import { FilmDetailProps } from "@/types/films";
 import { ArrowLeft, Calendar, Heart, User } from "lucide-react";
@@ -14,13 +15,13 @@ export default function FilmDetail() {
   const { slug } = useParams();
   const [isFavorite, setIsFavorite] = useState(false);
   const listFilm = useFilmStore(state => state.listFilm)
-  const [film, setFilm] = useState<FilmDetailProps | null >(null);
-  const router = useRouter() 
+  const [film, setFilm] = useState<FilmDetailProps | null>(null);
+  const router = useRouter()
 
   useEffect(() => {
     if (slug && listFilm?.length) {
       const foundFilm = listFilm.find(film => {
-        return film.id.slice(0,10) === slug.slice(0,10)
+        return film.id.slice(0, 10) === slug.slice(0, 10)
       });
       setFilm(foundFilm || null);
     }
@@ -35,19 +36,19 @@ export default function FilmDetail() {
 
   const toggleFavorite = () => {
     const favorites = JSON.parse(localStorage.getItem("favoriteFilms") || "[]");
-    
+
     if (isFavorite) {
-      const newFavorites  = favorites.filter((id : string) => id !== slug);
+      const newFavorites = favorites.filter((id: string) => id !== slug);
       localStorage.setItem("favoriteFilms", JSON.stringify(newFavorites));
     } else {
       favorites.push(slug);
       localStorage.setItem("favoriteFilms", JSON.stringify(favorites));
     }
-    
+
     setIsFavorite(!isFavorite);
   };
-  
-  
+
+
   if (!film) return (
     <div className="my-10 py-10">
       <Error message="Can't find your find that you are finding" onRetry={() => router.push('/films-list')} />
@@ -64,9 +65,9 @@ export default function FilmDetail() {
             </Link>
           </Button>
           <h1 className="text-center text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-black">{film.title}</h1>
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             className={`rounded-full transition-all ${isFavorite ? "text-destructive border-destructive hover:bg-destructive/10" : "text-muted-foreground"}`}
             onClick={toggleFavorite}
           >
@@ -139,6 +140,14 @@ export default function FilmDetail() {
           </div>
         </div>
       </div>
+      {film && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateFilmSchema(film))
+          }}
+        />
+      )}
     </div>
   );
 }
