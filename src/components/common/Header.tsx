@@ -17,11 +17,11 @@ export default function Header() {
   }, []);
 
   return (
-    <header className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
+    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4 md:py-6">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-indigo-400 dark:text-indigo-600">
+            <Link href="/" className="text-2xl font-bold">
               StarWars
             </Link>
           </div>
@@ -39,10 +39,6 @@ export default function Header() {
           </nav>
           
           <div className="flex items-center gap-4">
-            {/* <button className="hidden md:block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
-              Bắt đầu ngay
-            </button> */}
-            
             <button 
               className="md:hidden text-gray-700 dark:text-gray-300"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

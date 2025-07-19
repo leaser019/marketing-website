@@ -1,20 +1,32 @@
 "use client";
 
+import { Error } from "@/components/common/Error";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GET_FILM_BY_ID } from '@/graphql/queries';
-import { useQuery } from "@apollo/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFilmStore } from "@/store/store";
 import { ArrowLeft, Calendar, Heart, User } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function FilmDetail() {
   const { slug } = useParams();
   const [isFavorite, setIsFavorite] = useState(false);
+  const listFilm = useFilmStore(state => state.listFilm)
+  const [film, setFilm] = useState(null);
+  const router = useRouter() 
 
-  
-  const { data, loading, error } = useQuery(GET_FILM_BY_ID(slug));
+  useEffect(() => {
+    console.log(typeof slug);
+    if (slug && listFilm?.length) {
+      const foundFilm = listFilm.find(film => {
+        return film.id.slice(0,10) === slug.slice(0,10)
+      });
+      console.log(foundFilm);
+      setFilm(foundFilm || null);
+      console.log("done");
+    }
+  }, [slug, listFilm]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && slug) {
@@ -37,205 +49,118 @@ export default function FilmDetail() {
     setIsFavorite(!isFavorite);
   };
   
-  if (loading) return <FilmDetailSkeleton />;
-  if (error) return (
-    <div className="container mx-auto py-10 px-4">
-      <h2 className="text-2xl font-bold text-destructive mb-4">Đã xảy ra lỗi!</h2>
-      <p className="text-lg mb-6">{error.message}</p>
-      <Button asChild>
-        <Link href="/films-list">Quay lại danh sách phim</Link>
-      </Button>
-    </div>
-  );
   
-  const film = data?.film;
   if (!film) return (
-    <div className="container mx-auto py-10 px-4">
-      <h2 className="text-2xl font-bold mb-4">Không tìm thấy phim</h2>
-      <Button asChild>
-        <Link href="/films-list">Quay lại danh sách phim</Link>
-      </Button>
+    <div className="my-10 py-10">
+      <Error message="Can't find your find that you are finding" onRetry={() => router.push('/films-list')} />
     </div>
   );
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="flex items-center mb-6 gap-4">
-        <Button variant="ghost" asChild className="p-2">
-          <Link href="/films-list">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold">{film.title}</h1>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className={isFavorite ? "text-destructive" : "text-muted-foreground"}
-          onClick={toggleFavorite}
-        >
-          <Heart className="h-5 w-5" fill={isFavorite ? "currentColor" : "none"} />
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="container mx-auto py-10 px-4 my-10">
+        <div className="flex flex-col md:flex-row items-start md:items-center mb-8 gap-4">
+          <Button variant="ghost" asChild className="p-2 hover:bg-primary/10 rounded-full">
+            <Link href="/films-list">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">{film.title}</h1>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className={`rounded-full transition-all ${isFavorite ? "text-destructive border-destructive hover:bg-destructive/10" : "text-muted-foreground"}`}
+            onClick={toggleFavorite}
+          >
+            <Heart className="h-5 w-5" fill={isFavorite ? "currentColor" : "none"} />
+          </Button>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  {film.releaseDate}
-                </div>
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Đạo diễn: {film.director}
-                </div>
-              </div>
-              <CardTitle className="text-xl">Thông tin phim</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Mô tả</h3>
-                <div className="whitespace-pre-wrap text-muted-foreground">
-                  {film.openingCrawl}
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Nhà sản xuất</h3>
-                <p className="text-muted-foreground">{film.producers}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">Nhân vật</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {film.characterConnection?.characters?.map((character) => (
-              <Card key={character.id} className="transition-all hover:shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-lg">{character.name}</CardTitle>
-                  <CardDescription>
-                    {character.__typename}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm space-y-1">
-                    <p><span className="font-medium">ID:</span> {character.id}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="overflow-hidden border-t-4 border-t-primary shadow-md">
+              <CardHeader className="bg-muted/30">
+                <div className="flex flex-wrap gap-4 text-sm mb-4">
+                  <div className="flex items-center gap-2 px-3 py-1 bg-background rounded-full shadow-sm">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    {film.releaseDate}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <div className="flex items-center gap-2 px-3 py-1 bg-background rounded-full shadow-sm">
+                    <User className="h-4 w-4 text-primary" />
+                    {film.director}
+                  </div>
+                </div>
+                <CardTitle className="text-2xl">Film Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2 text-lg">
+                    <span className="inline-block w-1 h-5 bg-primary rounded-full"></span>
+                    Description
+                  </h3>
+                  <div className="whitespace-pre-wrap text-muted-foreground leading-relaxed bg-muted/20 p-4 rounded-lg border border-muted">
+                    {film.openingCrawl}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2 text-lg">
+                    <span className="inline-block w-1 h-5 bg-primary rounded-full"></span>
+                    Producer
+                  </h3>
+                  <p className="text-muted-foreground bg-muted/20 p-4 rounded-lg border border-muted">{film.producers}</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
 
-        <div>
-          <Card className="sticky top-6">
-            <CardHeader>
-              <CardTitle>Thông tin thêm</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Timeline</h3>
-                <div className="bg-muted h-2 rounded-full overflow-hidden mb-2">
-                  <div className="bg-primary h-full" style={{ width: "60%" }}></div>
+          <div>
+            <Card className="sticky top-6 shadow-md border-muted/60 overflow-hidden border-t-4 border-t-blue-500">
+              <CardHeader className="bg-muted/30">
+                <CardTitle>More Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <span className="inline-block w-1 h-4 bg-blue-500 rounded-full"></span>
+                    Timeline
+                  </h3>
+                  <div className="bg-muted/50 h-3 rounded-full overflow-hidden mb-3">
+                    <div className="bg-gradient-to-r from-blue-500 to-primary h-full rounded-full" style={{ width: "60%" }}></div>
+                  </div>
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary rounded-full font-medium">
+                      {parseInt(film.id.split(':')[1]) || "?"}
+                    </span>
+                    <span>in film series</span>
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground">Phần {parseInt(film.id.split(':')[1]) || "?"} trong series</p>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-2">Liên quan</h3>
-                <div className="space-y-2">
-                  <Button variant="outline" asChild className="w-full justify-start">
-                    <Link href="/characters">Tất cả nhân vật</Link>
-                  </Button>
-                  <Button variant="outline" asChild className="w-full justify-start">
-                    <Link href="/films-list">Các phim khác</Link>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FilmDetailSkeleton() {
-  return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="flex items-center mb-6 gap-4">
-        <div className="h-9 w-9 bg-muted rounded-md"></div>
-        <div className="h-8 bg-muted rounded-md w-64"></div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card className="animate-pulse">
-            <CardHeader>
-              <div className="flex gap-4 mb-4">
-                <div className="h-5 bg-muted rounded-md w-24"></div>
-                <div className="h-5 bg-muted rounded-md w-32"></div>
-              </div>
-              <div className="h-6 bg-muted rounded-md w-40"></div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="h-6 bg-muted rounded-md w-24 mb-2"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded-md"></div>
-                  <div className="h-4 bg-muted rounded-md"></div>
-                  <div className="h-4 bg-muted rounded-md"></div>
-                </div>
-              </div>
-              <div>
-                <div className="h-6 bg-muted rounded-md w-32 mb-2"></div>
-                <div className="h-4 bg-muted rounded-md w-40"></div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="h-8 bg-muted rounded-md w-40 mt-8 mb-4"></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {Array(6).fill(0).map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-5 bg-muted rounded-md w-3/4 mb-2"></div>
-                  <div className="h-4 bg-muted rounded-md w-1/3"></div>
-                </CardHeader>
-                <CardContent>
+                
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <span className="inline-block w-1 h-4 bg-blue-500 rounded-full"></span>
+                    Related
+                  </h3>
                   <div className="space-y-2">
-                    <div className="h-4 bg-muted rounded-md"></div>
-                    <div className="h-4 bg-muted rounded-md"></div>
-                    <div className="h-4 bg-muted rounded-md"></div>
+                    <Button variant="outline" asChild className="w-full justify-start hover:bg-muted/30 hover:text-primary transition-colors">
+                      <Link href="/characters">
+                        <User className="h-4 w-4 mr-2" />
+                        All Characters
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild className="w-full justify-start hover:bg-muted/30 hover:text-primary transition-colors">
+                      <Link href="/films-list">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Other films
+                      </Link>
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <Card className="animate-pulse">
-            <CardHeader>
-              <div className="h-6 bg-muted rounded-md w-32"></div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="h-5 bg-muted rounded-md w-24 mb-2"></div>
-                <div className="h-2 bg-muted rounded-full mb-2"></div>
-                <div className="h-4 bg-muted rounded-md w-36"></div>
-              </div>
-              <div>
-                <div className="h-5 bg-muted rounded-md w-24 mb-2"></div>
-                <div className="space-y-2">
-                  <div className="h-9 bg-muted rounded-md"></div>
-                  <div className="h-9 bg-muted rounded-md"></div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

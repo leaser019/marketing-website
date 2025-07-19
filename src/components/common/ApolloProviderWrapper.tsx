@@ -1,6 +1,6 @@
 "use client";
 
-import { ApolloLink, HttpLink } from "@apollo/client";
+import { ApolloLink, FetchPolicy, HttpLink } from "@apollo/client";
 import {
   ApolloNextAppProvider,
   NextSSRApolloClient,
@@ -13,8 +13,16 @@ function makeClient() {
     uri:  process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
   });
 
-  return new NextSSRApolloClient({
+    return new NextSSRApolloClient({
     cache: new NextSSRInMemoryCache(),
+    defaultOptions: {
+      query: {
+        fetchPolicy: 'network only' as FetchPolicy,
+      },
+      watchQuery: {
+        fetchPolicy: 'network only' as FetchPolicy,
+      },
+    },
     link:
       typeof window === "undefined"
         ? ApolloLink.from([

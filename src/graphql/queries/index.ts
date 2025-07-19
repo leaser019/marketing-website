@@ -18,10 +18,10 @@ export const GET_ALL_FILMS = gql`
 }
 `;
 
-export const GET_FILM_BY_ID = (slug: String) => 
+export const GET_FILM_BY_ID = (slug: string) => 
   (slug ? gql`
-    query GetFilmById {
-      film(id: "${slug}") {
+    query GetFilmById($id: ID!) {
+      film(id: $id) {
         created
         director
         edited
@@ -39,8 +39,8 @@ export const GET_FILM_BY_ID = (slug: String) =>
         }
       }
     }
-  ` : gql``);
-
+  ` : gql`query GetFilmById {}`);
+  
 export const GET_ALL_CHARACTERS = gql`
  query GetAllCharacters {
    allPeople {
