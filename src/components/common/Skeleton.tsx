@@ -5,7 +5,7 @@ import {
   CardHeader
 } from '@/components/ui/card';
 
-function FilmDetailSkeleton() {
+export function FilmDetailSkeleton() {
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="flex items-center mb-6 gap-4">
@@ -85,7 +85,7 @@ function FilmDetailSkeleton() {
   );
 }
 
-function FeaturedFilmsSkeleton() {
+export function FeaturedFilmsSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {[1, 2, 3].map((i) => (
@@ -110,7 +110,7 @@ function FeaturedFilmsSkeleton() {
   );
 }
 
-function FilmsListSkeleton() {
+export function FilmsListSkeleton() {
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -146,7 +146,7 @@ function FilmsListSkeleton() {
   );
 }
 
-function CharactersGridSkeleton() {
+export function CharactersGridSkeleton() {
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -175,6 +175,3 @@ function CharactersGridSkeleton() {
     </div>
   );
 }
-
-export { CharactersGridSkeleton, FeaturedFilmsSkeleton, FilmDetailSkeleton, FilmsListSkeleton };
-

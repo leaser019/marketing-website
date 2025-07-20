@@ -1,11 +1,14 @@
 'use client'
 
+import { ThemeToggle } from "@/components/ui/themeToggle";
+import { useTheme } from "@/hooks/useTheme";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Header() {
-   const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme } = useTheme();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -21,24 +24,25 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4 md:py-6">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold">
+            <Link href="/" className="text-2xl font-bold animate-fadeIn">
               StarWars
             </Link>
           </div>
           
           <nav className="hidden md:flex space-x-10">
-            <Link href="/home" className="text-base font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">
+            <Link href="/home" className="text-base font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 transition-colors hover:scale-105 transform duration-300">
               Home Page
             </Link>
-            <Link href="/films-list" className="text-base font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">
+            <Link href="/films-list" className="text-base font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 transition-colors hover:scale-105 transform duration-300">
               Film
             </Link>
-            <Link href="/characters" className="text-base font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">
+            <Link href="/characters" className="text-base font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 transition-colors hover:scale-105 transform duration-300">
               Characters
             </Link>
           </nav>
           
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <button 
               className="md:hidden text-gray-700 dark:text-gray-300"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
