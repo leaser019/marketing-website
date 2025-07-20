@@ -50,8 +50,11 @@ export default function FilmDetail() {
 
 
   if (!film) return (
-    <div className="my-10 py-10">
-      <Error message="Can't find your find that you are finding" onRetry={() => router.push('/films-list')} />
+    <div className="my-10 px-8">
+      <Error
+        message="Can't find your find that you are finding"
+        onRetry={() => router.push('/films-list')}
+      />
     </div>
   );
 
