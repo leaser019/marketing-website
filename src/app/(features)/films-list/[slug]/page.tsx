@@ -49,32 +49,39 @@ export default function FilmDetail() {
   };
 
 
-  if (!film) return (
-    <div className="my-10 px-8">
-      <Error
-        message="Can't find your find that you are finding"
-        onRetry={() => router.push('/films-list')}
-      />
-    </div>
-  );
+  if (!film)
+    return (
+      <div className="my-10">
+        <Error
+          message="Không tìm thấy bộ phim bạn đang tìm kiếm"
+          onRetry={() => router.push('/films-list')}
+        />
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto py-10 px-4 my-10">
+      <div className="container mx-auto my-10">
         <div className="flex flex-col md:flex-row items-start md:items-center mb-8 gap-4">
           <Button variant="ghost" asChild className="p-2 hover:bg-primary/10 rounded-full">
             <Link href="/films-list">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <h1 className="text-center text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-black">{film.title}</h1>
+          <h1 className="text-center text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-black">
+            {film.title}
+          </h1>
           <Button
             variant="outline"
             size="icon"
-            className={`rounded-full transition-all ${isFavorite ? "text-destructive border-destructive hover:bg-destructive/10" : "text-muted-foreground"}`}
+            className={`rounded-full transition-all ${
+              isFavorite
+                ? 'text-destructive border-destructive hover:bg-destructive/10'
+                : 'text-muted-foreground'
+            }`}
             onClick={toggleFavorite}
           >
-            <Heart className="h-5 w-5" fill={isFavorite ? "currentColor" : "none"} />
+            <Heart className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} />
           </Button>
         </div>
 
@@ -109,7 +116,9 @@ export default function FilmDetail() {
                     <span className="inline-block w-1 h-5 bg-primary rounded-full"></span>
                     Producer
                   </h3>
-                  <p className="text-muted-foreground bg-muted/20 p-4 rounded-lg border border-muted">{film.producers}</p>
+                  <p className="text-muted-foreground bg-muted/20 p-4 rounded-lg border border-muted">
+                    {film.producers}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -124,13 +133,21 @@ export default function FilmDetail() {
                     Related
                   </h3>
                   <div className="space-y-2">
-                    <Button variant="outline" asChild className="w-full justify-start hover:bg-muted/30 hover:text-primary transition-colors">
+                    <Button
+                      variant="outline"
+                      asChild
+                      className="w-full justify-start hover:bg-muted/30 hover:text-primary transition-colors"
+                    >
                       <Link href="/characters">
                         <User className="h-4 w-4 mr-2" />
                         All Characters
                       </Link>
                     </Button>
-                    <Button variant="outline" asChild className="w-full justify-start hover:bg-muted/30 hover:text-primary transition-colors">
+                    <Button
+                      variant="outline"
+                      asChild
+                      className="w-full justify-start hover:bg-muted/30 hover:text-primary transition-colors"
+                    >
                       <Link href="/films-list">
                         <Calendar className="h-4 w-4 mr-2" />
                         All Films
@@ -147,7 +164,7 @@ export default function FilmDetail() {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateFilmSchema(film))
+            __html: JSON.stringify(generateFilmSchema(film)),
           }}
         />
       )}
